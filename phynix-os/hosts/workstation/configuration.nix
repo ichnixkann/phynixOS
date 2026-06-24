@@ -3,6 +3,7 @@
   imports = [
     ./hardware-configuration.nix
     home-manager.nixosModules.home-manager
+    ../../modules/dev/default.nix
   ];
 
   boot.loader.grub.device = "/dev/sda";

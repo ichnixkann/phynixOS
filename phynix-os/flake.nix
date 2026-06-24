@@ -14,7 +14,11 @@
   outputs = { self, nixpkgs, home-manager, hyprland, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = nixpkgs.legacyPackages.${system};
+        pkgs = (nixpkgs.legacyPackages.${system}).extend (self: super: import ./overlays/rust-tools.nix {
+          pkgs = self;
+          lib = nixpkgs.lib;
+          inherit (super) fetchFromGitHub rustPlatform;
+        });
       in
       {
         devShells.default = pkgs.mkShell {

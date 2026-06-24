@@ -69,11 +69,28 @@ pcopilot --evolution-status
 **Fish** is the default user shell with:
 - Auto-generated completions for pcopilot
 - Helper functions: `pcopilot_audit`, `pcopilot_backend`
+- Functions for Rust tools: `claurst-claude`, `crush-menu`
 - Smart aliases and productivity functions
 
 **Bash** is the backbone shell for scripts with:
 - Full completion support
 - Compatibility with system tools
+
+## 🦀 Rust Tools Integration
+
+**claurst** — Claude Rust CLI
+```bash
+claurst --help              # View help
+pcopilot-claurst          # Alias for claurst
+```
+
+**crush** — charmbracelet TUI
+```bash
+crush --help               # View help
+crush-menu                 # Fish function launcher
+```
+
+See [TOOLS_INTEGRATION.md](TOOLS_INTEGRATION.md) for detailed integration and usage.
 
 ## 🔧 Building
 
