@@ -7,7 +7,7 @@
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    hyprland.url = "github:hyprwm/hyprland/master";
+    hyprland.url = "github:hyprwm/hyprland/main";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
