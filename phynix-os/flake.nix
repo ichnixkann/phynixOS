@@ -36,6 +36,7 @@
         packages.phynix-copilot = pkgs.python3Packages.buildPythonApplication {
           pname = "phynix-copilot";
           version = "0.2.0";
+          format = "other";
           src = ./pkgs/phynix-copilot;
 
           propagatedBuildInputs = with pkgs.python3Packages; [
