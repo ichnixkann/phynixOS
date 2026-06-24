@@ -11,7 +11,7 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, home-manager, hyprland, flake-utils }:
+  outputs = { self, nixpkgs, home-manager, hyprland, flake-utils, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = (nixpkgs.legacyPackages.${system}).extend (self: super: import ./overlays/rust-tools.nix {
@@ -67,7 +67,7 @@
       nixosConfigurations = {
         workstation = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
-          specialArgs = { inherit home-manager hyprland; };
+          specialArgs = { inherit home-manager; };
           modules = [
             ./hosts/workstation/configuration.nix
             ./modules/core/default.nix
@@ -77,7 +77,7 @@
         };
         installer-iso = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
-          specialArgs = { inherit home-manager hyprland; };
+          specialArgs = { inherit home-manager; };
           modules = [
             "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
             ./hosts/installer/configuration.nix
