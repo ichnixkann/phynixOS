@@ -74,6 +74,16 @@ def main():
         action="store_true",
         help="Rollback all pending changes"
     )
+    parser.add_argument(
+        "--reindex",
+        action="store_true",
+        help="Re-index all documentation sources"
+    )
+    parser.add_argument(
+        "--rag-status",
+        action="store_true",
+        help="Show RAG index status"
+    )
 
     args = parser.parse_args()
 
@@ -122,6 +132,26 @@ def main():
     if args.rollback:
         result = copilot.write_agent.rollback_pending()
         print(f"✓ Rolled back {result['rolled_back']} changes")
+        return 0
+
+    if args.reindex:
+        print("Re-indexing all documentation sources...")
+        result = copilot.rag.index_all()
+        print(f"✓ Backend: {result['backend']}")
+        print(f"✓ NixOS options: {result['nixos_options']['count']} chunks")
+        print(f"✓ Home Manager: {result['home_manager']['count']} chunks")
+        print(f"✓ Hyprland: {result['hyprland']['count']} chunks")
+        print(f"✓ Total: {result['total_chunks']} chunks indexed")
+        return 0
+
+    if args.rag_status:
+        status = copilot.rag.status()
+        print(f"Backend: {status['backend']}")
+        print(f"Documents: {status['total_docs']}")
+        print(f"Ready: {status['ready']}")
+        print(f"Path: {status['db_path']}")
+        if "note" in status:
+            print(f"Note: {status['note']}")
         return 0
 
     if args.backend:

@@ -78,6 +78,13 @@ class PhynixCopilot:
         with open(self.audit_log, "a") as f:
             f.write(json.dumps(entry) + "\n")
 
+    def ensure_rag_ready(self):
+        """Bootstrap RAG index if empty on first run."""
+        status = self.rag.status()
+        if not status.get("ready"):
+            print("[PHYNIX Copilot] Bootstrapping RAG index...", file=sys.stderr)
+            self.rag.index_all()
+
     def process_query(self, query: str) -> Dict[str, Any]:
         """
         Process user query:
@@ -87,7 +94,7 @@ class PhynixCopilot:
         """
         self.log_action("query_received", "processing", {"query": query})
 
-        # Retrieve RAG context
+        # Retrieve RAG context (real documents now)
         rag_context = self.rag.build_context(query)
 
         # Route query based on keywords
@@ -145,8 +152,11 @@ class PhynixCopilot:
 
     def run_interactive(self):
         """Interactive CLI mode"""
+        self.ensure_rag_ready()
         print("PHYNIX Copilot — Interactive Mode", file=sys.stderr)
         print(f"LLM Backend: {self.llm_backend}", file=sys.stderr)
+        rag_status = self.rag.status()
+        print(f"RAG: {rag_status['backend']} ({rag_status['total_docs']} docs)", file=sys.stderr)
         print("Type 'exit' to quit", file=sys.stderr)
         print()
 
