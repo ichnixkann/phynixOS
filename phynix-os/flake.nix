@@ -23,7 +23,6 @@
       {
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
-            nixos-generators
             pkgs.home-manager
             python3
             python3Packages.pip
