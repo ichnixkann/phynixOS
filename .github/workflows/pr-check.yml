@@ -1,0 +1,48 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  syntax:
+    name: Python Syntax & Imports
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Syntax check
+        run: |
+          for f in phynix-os/pkgs/phynix-copilot/*.py; do
+            python3 -m py_compile "$f" && echo "✓ $f"
+          done
+      - name: RAG + routing smoke test
+        run: |
+          pip install pydantic requests --quiet
+          python3 << 'EOF'
+          import sys, tempfile
+          sys.path.insert(0, 'phynix-os/pkgs/phynix-copilot')
+          from rag import RAGIndex
+
+          with tempfile.TemporaryDirectory() as tmp:
+              rag = RAGIndex(tmp)
+              r = rag.index_all()
+              assert r['total_chunks'] > 0
+              hits = rag.search("hyprland keybind")
+              assert hits
+              print(f"✓ RAG smoke test: {r['total_chunks']} docs, search OK")
+          EOF
+
+  nix-check:
+    name: Nix Flake Validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v27
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+      - name: Flake check (no build)
+        run: nix flake check ./phynix-os --no-build

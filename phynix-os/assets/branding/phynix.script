@@ -1,0 +1,31 @@
+// PHYNIX OS Plymouth Boot Animation
+// Phoenix rising from binary fire
+
+Window.SetBackgroundTopColor(0.04, 0.04, 0.04);
+Window.SetBackgroundBottomColor(0.0, 0.0, 0.0);
+
+logo_image = Image("phynix-logo.png");
+logo_sprite = Sprite(logo_image);
+logo_sprite.SetX(Window.GetWidth() / 2 - logo_image.GetWidth() / 2);
+logo_sprite.SetY(Window.GetHeight() / 2 - logo_image.GetHeight() / 2 - 40);
+
+// Progress bar
+bar_width = 300;
+bar_height = 4;
+bar_x = Window.GetWidth() / 2 - bar_width / 2;
+bar_y = Window.GetHeight() * 0.75;
+
+bar_bg = Rectangle(bar_x, bar_y, bar_width, bar_height);
+bar_bg.SetColor(0.1, 0.1, 0.1);
+
+bar_fill = Rectangle(bar_x, bar_y, 0, bar_height);
+bar_fill.SetColor(1.0, 0.42, 0.0);   // Phoenix orange
+
+progress = 0.0;
+
+fun refresh_callback() {
+    progress = Math.Min(progress + 0.004, 1.0);
+    bar_fill.SetWidth(bar_width * progress);
+}
+
+Plymouth.SetRefreshFunction(refresh_callback);

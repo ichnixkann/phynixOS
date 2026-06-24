@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=PHYNIX OS
+Description=Phoenix rising from the binary fire
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/phynix/images
+ScriptFile=/usr/share/plymouth/themes/phynix/phynix.script
