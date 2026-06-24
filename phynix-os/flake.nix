@@ -47,12 +47,11 @@
 
           postInstall = ''
             mkdir -p $out/bin
-            cp cli.py $out/bin/pcopilot
+            cp $src/cli.py $out/bin/pcopilot
             chmod +x $out/bin/pcopilot
 
-            # Install completions
-            mkdir -p $out/share/fish/completions
-            cp completions.py $out/share/phynix-copilot/
+            mkdir -p $out/share/phynix-copilot
+            cp $src/completions.py $out/share/phynix-copilot/
           '';
 
           meta = {
