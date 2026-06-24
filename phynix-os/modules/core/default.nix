@@ -4,6 +4,7 @@
     ./boot.nix
     ./networking.nix
     ./audio.nix
+    ./shell.nix
   ];
 
   system.stateVersion = "24.05";

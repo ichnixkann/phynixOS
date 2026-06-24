@@ -23,27 +23,36 @@
             home-manager
             python3
             python3Packages.pip
+            python3Packages.textual
+            python3Packages.rich
+            fish
           ];
         };
 
         packages.phynix-copilot = pkgs.python3Packages.buildPythonApplication {
           pname = "phynix-copilot";
-          version = "0.1.0";
+          version = "0.2.0";
           src = ./pkgs/phynix-copilot;
 
           propagatedBuildInputs = with pkgs.python3Packages; [
             requests
             pydantic
+            textual
+            rich
           ];
 
           postInstall = ''
             mkdir -p $out/bin
             cp cli.py $out/bin/pcopilot
             chmod +x $out/bin/pcopilot
+
+            # Install completions
+            mkdir -p $out/share/fish/completions
+            cp completions.py $out/share/phynix-copilot/
           '';
 
           meta = {
-            description = "PHYNIX OS Copilot — AI Assistant for NixOS Configuration";
+            description = "PHYNIX OS Copilot — Self-evolving AI Assistant for NixOS";
             license = pkgs.lib.licenses.mit;
           };
         };

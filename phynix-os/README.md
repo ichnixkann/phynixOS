@@ -48,12 +48,32 @@ pcopilot
 # Single query
 pcopilot "search nixpkgs for git"
 
+# Textual TUI
+pcopilot --tui
+
 # Show audit log
 pcopilot --audit-log
 
 # Show LLM backend
 pcopilot --backend
+
+# Generate shell completions
+pcopilot --generate-completions ~/.config/fish/completions
+
+# View evolution history
+pcopilot --evolution-status
 ```
+
+## 🐚 Shell Integration
+
+**Fish** is the default user shell with:
+- Auto-generated completions for pcopilot
+- Helper functions: `pcopilot_audit`, `pcopilot_backend`
+- Smart aliases and productivity functions
+
+**Bash** is the backbone shell for scripts with:
+- Full completion support
+- Compatibility with system tools
 
 ## 🔧 Building
 
@@ -78,13 +98,13 @@ nix build .#phynix-copilot              # Build agent standalone
 |-------|---------|--------|
 | 0 | Flake skeleton, core modules, Hyprland | ✅ Complete |
 | 1 | Read-only tools, RAG index, CLI | ✅ Complete |
-| 2 | Write tools, Home Manager autonomy | ⏳ Pending |
-| 3 | TUI interface, Installer ISO | ⏳ Pending |
-| 4 | Branding, Cachix, Plymouth | ⏳ Pending |
+| 2 | Self-evolution, TUI, Shell integration | ✅ Complete |
+| 3 | Write tools, Home Manager autonomy | ⏳ Pending |
+| 4 | Installer TUI, Cachix, Branding | ⏳ Pending |
 | 5 | Public launch | ⏳ Pending |
 
-See [PHASE_1.md](PHASE_1.md) for detailed architecture and tool documentation.
+See [PHASE_1.md](PHASE_1.md) and [PHASE_2.md](PHASE_2.md) for architecture.
 
 ---
 
-**Status:** Phase 1 complete. Copilot read-only intelligence ready. Next: Phase 2 (write tools + autonomy).
+**Status:** Phase 2 complete. Self-evolution, TUI, and Shell integration ready. Next: Phase 3 (write tools + Home Manager autonomy).
