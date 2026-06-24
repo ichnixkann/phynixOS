@@ -23,7 +23,6 @@
     python3
     python3Packages.pip
     nodejs
-    node2nix
   ];
 
   # Enable development shells
