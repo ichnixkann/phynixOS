@@ -1,7 +1,10 @@
-{ pkgs, lib, fetchFromGitHub, rustPlatform, python3Packages, ... }:
+{ pkgs, lib, fetchFromGitHub, rustPlatform, ... }:
+let
+  python3Packages = pkgs.python3Packages;
+in
 {
   # Omo Ultimate — OpenCode assistant
-  omo-ultimate = pkgs.python3Packages.buildPythonApplication rec {
+  omo-ultimate = python3Packages.buildPythonApplication rec {
     pname = "omo-ultimate";
     version = "1.0.0";
 
