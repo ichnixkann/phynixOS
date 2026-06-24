@@ -21,8 +21,34 @@
           buildInputs = with pkgs; [
             nixos-generators
             home-manager
+            python3
+            python3Packages.pip
           ];
         };
+
+        packages.phynix-copilot = pkgs.python3Packages.buildPythonApplication {
+          pname = "phynix-copilot";
+          version = "0.1.0";
+          src = ./pkgs/phynix-copilot;
+
+          propagatedBuildInputs = with pkgs.python3Packages; [
+            requests
+            pydantic
+          ];
+
+          postInstall = ''
+            mkdir -p $out/bin
+            cp cli.py $out/bin/pcopilot
+            chmod +x $out/bin/pcopilot
+          '';
+
+          meta = {
+            description = "PHYNIX OS Copilot — AI Assistant for NixOS Configuration";
+            license = pkgs.lib.licenses.mit;
+          };
+        };
+
+        packages.default = self.packages.${system}.phynix-copilot;
       }
     ) // {
       nixosConfigurations = {

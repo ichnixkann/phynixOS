@@ -1,4 +1,22 @@
 { config, pkgs, lib, ... }:
+let
+  phynix-copilot = pkgs.python3Packages.buildPythonApplication {
+    pname = "phynix-copilot";
+    version = "0.1.0";
+    src = ../../pkgs/phynix-copilot;
+
+    propagatedBuildInputs = with pkgs.python3Packages; [
+      requests
+      pydantic
+    ];
+
+    postInstall = ''
+      mkdir -p $out/bin
+      cp cli.py $out/bin/pcopilot
+      chmod +x $out/bin/pcopilot
+    '';
+  };
+in
 {
   options.phynix.copilot.enable = lib.mkEnableOption "PHYNIX Copilot service";
 
@@ -12,7 +30,8 @@
 
       Service = {
         Type = "simple";
-        ExecStart = "${pkgs.python3}/bin/python3 %h/.local/share/phynix/copilot/agent.py";
+        ExecStart = "${phynix-copilot}/bin/pcopilot";
+        Environment = "PHYNIX_DAEMON=1";
         Restart = "on-failure";
         RestartSec = 5;
         StandardOutput = "journal";
@@ -23,8 +42,7 @@
     };
 
     environment.systemPackages = with pkgs; [
-      python3
-      python3Packages.pip
+      phynix-copilot
       ollama
     ];
 
