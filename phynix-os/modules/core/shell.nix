@@ -7,37 +7,24 @@
     vendor.functions.enable = true;
 
     shellInit = ''
-      # PHYNIX OS Fish Configuration
       set -x EDITOR vim
       set -x PAGER less
-
-      # Add phynix completions
-      if test -d ${placeholder "out"}/share/fish/vendor_completions.d
-        set fish_complete_path ${placeholder "out"}/share/fish/vendor_completions.d $fish_complete_path
-      end
-
-      # Welcome banner
-      echo "🐠 PHYNIX OS — Fish Shell"
     '';
 
     interactiveShellInit = ''
-      # Aliases
       alias ll "ls -lah"
       alias vi "vim"
       alias nix-build "nix build"
       alias nix-check "nix flake check"
-    '';
 
-    functions = {
-      mkcd = ''
+      function mkcd
         mkdir -p $argv
         cd $argv[1]
-      '';
+      end
 
-      fish_greeting = ''
-        # Suppress default greeting
-      '';
-    };
+      function fish_greeting
+      end
+    '';
   };
 
   users.users.phynix.shell = pkgs.fish;
