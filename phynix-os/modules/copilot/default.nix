@@ -41,11 +41,9 @@ in
       Install.WantedBy = [ "graphical-session.target" ];
     };
 
-    environment.systemPackages = with pkgs; [
+    environment.systemPackages = [
       phynix-copilot
-      ollama
+      pkgs.ollama
     ];
-
-    phynix.copilot.enable = true;
   };
 }
