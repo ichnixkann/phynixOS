@@ -53,10 +53,33 @@ def main():
         action="store_true",
         help="Show agent evolution status"
     )
+    parser.add_argument(
+        "--interactive",
+        action="store_true",
+        default=True,
+        help="Interactive mode (approve each change)"
+    )
+    parser.add_argument(
+        "--daemon",
+        action="store_true",
+        help="Daemon mode (auto-approve safe operations)"
+    )
+    parser.add_argument(
+        "--pending",
+        action="store_true",
+        help="Show pending changes"
+    )
+    parser.add_argument(
+        "--rollback",
+        action="store_true",
+        help="Rollback all pending changes"
+    )
 
     args = parser.parse_args()
 
-    copilot = PhynixCopilot()
+    # Determine mode
+    interactive_mode = not args.daemon
+    copilot = PhynixCopilot(interactive=interactive_mode)
 
     if args.tui:
         try:
@@ -85,6 +108,20 @@ def main():
         print("Evolution History:")
         for entry in history:
             print(f"  {entry['timestamp']}: {entry['description']}")
+        return 0
+
+    if args.pending:
+        sandbox = copilot.write_agent.get_sandbox_status()
+        print(f"Pending changes: {sandbox['pending_changes']}")
+        print(f"Interactive mode: {sandbox['interactive_mode']}")
+        print(f"Sandbox scope:")
+        for scope, ops in sandbox['sandbox_scope'].items():
+            print(f"  {scope}: {', '.join(ops)}")
+        return 0
+
+    if args.rollback:
+        result = copilot.write_agent.rollback_pending()
+        print(f"✓ Rolled back {result['rolled_back']} changes")
         return 0
 
     if args.backend:

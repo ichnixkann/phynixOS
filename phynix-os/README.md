@@ -99,12 +99,40 @@ nix build .#phynix-copilot              # Build agent standalone
 | 0 | Flake skeleton, core modules, Hyprland | ✅ Complete |
 | 1 | Read-only tools, RAG index, CLI | ✅ Complete |
 | 2 | Self-evolution, TUI, Shell integration | ✅ Complete |
-| 3 | Write tools, Home Manager autonomy | ⏳ Pending |
-| 4 | Installer TUI, Cachix, Branding | ⏳ Pending |
-| 5 | Public launch | ⏳ Pending |
+| 3 | Write-mode tools, Home Manager autonomy | ✅ Complete |
+| 4 | ChromaDB ingestion, Installer TUI | ⏳ Pending |
+| 5 | Branding, Cachix, Public launch | ⏳ Pending |
 
-See [PHASE_1.md](PHASE_1.md) and [PHASE_2.md](PHASE_2.md) for architecture.
+See [PHASE_1.md](PHASE_1.md), [PHASE_2.md](PHASE_2.md), and [PHASE_3.md](PHASE_3.md) for architecture.
+
+## 🔐 Write-Mode Operations
+
+Agent can now propose and apply system changes with confirmation gates:
+
+```bash
+# Interactive mode (confirm each change)
+pcopilot "install ripgrep hm"
+
+# Daemon mode (auto-approve safe operations)
+pcopilot --daemon
+
+# View pending changes
+pcopilot --pending
+
+# Rollback all changes
+pcopilot --rollback
+```
+
+**Safe Operations** (auto-approvable):
+- Home Manager package installs
+- Shell aliases and functions
+- Environment variables
+
+**Unsafe Operations** (require approval):
+- System rebuild switch
+- Security-sensitive changes
+- Systemd unit modifications
 
 ---
 
-**Status:** Phase 2 complete. Self-evolution, TUI, and Shell integration ready. Next: Phase 3 (write tools + Home Manager autonomy).
+**Status:** Phase 3 complete. Write-mode tools with safety gates ready. Next: Phase 4 (ChromaDB + Installer TUI).

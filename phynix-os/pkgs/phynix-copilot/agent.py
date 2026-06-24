@@ -15,10 +15,11 @@ from datetime import datetime
 # Import local modules
 from tools import NixTools, HyprlandTools, SystemTools
 from rag import RAGIndex
+from write_agent import WriteAgent
 
 
 class PhynixCopilot:
-    def __init__(self):
+    def __init__(self, interactive: bool = True):
         self.cache_dir = Path.home() / ".local/state/phynix"
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.audit_log = self.cache_dir / "audit.jsonl"
@@ -27,8 +28,10 @@ class PhynixCopilot:
         self.hyprland_tools = HyprlandTools()
         self.system_tools = SystemTools()
         self.rag = RAGIndex()
+        self.write_agent = WriteAgent(interactive=interactive)
 
         self.llm_backend = self._detect_lm_backend()
+        self.interactive = interactive
 
     def _detect_lm_backend(self) -> str:
         """
@@ -102,8 +105,18 @@ class PhynixCopilot:
         return result
 
     def _route_query(self, query: str) -> Dict[str, Any]:
-        """Route query to appropriate tool"""
+        """Route query to appropriate tool (read-only or write)"""
         query_lower = query.lower()
+
+        # WRITE OPERATIONS (Phase 3+)
+        if any(x in query_lower for x in ["install", "add", "remove", "rebuild", "switch"]):
+            return {
+                "tool": "write_agent",
+                "mode": "interactive" if self.interactive else "sandbox",
+                "result": self.write_agent.handle_query(query)
+            }
+
+        # READ-ONLY OPERATIONS (Phase 1+)
 
         # Nix operations
         if "search" in query_lower and any(x in query_lower for x in ["package", "pkg", "nixpkgs"]):
@@ -127,7 +140,7 @@ class PhynixCopilot:
         return {
             "tool": "llm_reasoning",
             "backend": self.llm_backend,
-            "note": "Phase 1: LLM integration pending"
+            "note": "LLM reasoning pending (read-only tools available)"
         }
 
     def run_interactive(self):
