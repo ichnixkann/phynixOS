@@ -68,13 +68,18 @@ pcopilot --evolution-status
 
 **Fish** is the default user shell with:
 - Auto-generated completions for pcopilot
-- Helper functions: `pcopilot_audit`, `pcopilot_backend`
+- **oh-my-fish** plugin framework (optional, install via `curl https://get.oh-my.fish | fish`)
+- **Tide Prompt** integration (modern, customizable prompt)
+- **oh-my-openagent** support (AI agent framework)
 - Functions for Rust tools: `claurst-claude`, `crush-menu`
+- Helper functions: `phynix-dev`, `phynix-rebuild`, `phynix-status`
 - Smart aliases and productivity functions
 
 **Bash** is the backbone shell for scripts with:
 - Full completion support
 - Compatibility with system tools
+
+See [FISH_SETUP.md](FISH_SETUP.md) for oh-my-fish + Tide + oh-my-openagent setup.
 
 ## 🦀 Rust Tools Integration
 

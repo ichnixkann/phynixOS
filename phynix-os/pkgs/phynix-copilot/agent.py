@@ -118,8 +118,8 @@ class PhynixCopilot:
 
         # READ-ONLY OPERATIONS (Phase 1+)
 
-        # Nix operations
-        if "search" in query_lower and any(x in query_lower for x in ["package", "pkg", "nixpkgs"]):
+        # Nix operations - search
+        if "search" in query_lower:
             search_term = query.split("search")[-1].strip()
             return {"tool": "nix_search", "result": self.nix_tools.nix_search(search_term)}
 
