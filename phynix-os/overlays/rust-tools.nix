@@ -1,5 +1,31 @@
-{ pkgs, lib, fetchFromGitHub, rustPlatform, ... }:
+{ pkgs, lib, fetchFromGitHub, rustPlatform, python3Packages, ... }:
 {
+  # Omo Ultimate — OpenCode assistant
+  omo-ultimate = pkgs.python3Packages.buildPythonApplication rec {
+    pname = "omo-ultimate";
+    version = "1.0.0";
+
+    src = fetchFromGitHub {
+      owner = "omolabs";  # Adjust owner if different
+      repo = "omo";
+      rev = "main";
+      sha256 = lib.fakeSha256;
+    };
+
+    propagatedBuildInputs = with pkgs.python3Packages; [
+      requests
+      click
+      pyyaml
+      pydantic
+    ];
+
+    meta = {
+      description = "Omo Ultimate — Advanced code assistant for OpenCode";
+      license = lib.licenses.mit;
+      maintainers = [ ];
+    };
+  };
+
   # claurst — Claude Rust CLI Tool
   claurst = rustPlatform.buildRustPackage rec {
     pname = "claurst";

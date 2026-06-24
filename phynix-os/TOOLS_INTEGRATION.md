@@ -44,6 +44,32 @@ crush-menu                        # Fish function launcher
 - Can be used for interactive selections
 - Integrates with PHYNIX TUI ecosystem
 
+### Omo Ultimate — OpenCode Assistant
+
+**Purpose:** Advanced code assistant for OpenCode
+
+**Integration:**
+- User-space application
+- Available via `omo-ultimate` command
+- Nix package in `overlays/rust-tools.nix`
+- Home Manager integration
+- Fish shell functions
+
+**Usage:**
+```bash
+omo-ultimate --help               # View help
+omo-ultimate code "your query"    # Ask about code
+omo-ultimate init                 # Initialize project
+code-review                       # Review current directory
+ask-omo "explain this function"   # Fish function
+```
+
+**Where it fits:**
+- Companion to claurst for Claude queries
+- OpenCode-native code assistant
+- Integrated with PHYNIX development workflow
+- Can be combined with PHYNIX Copilot for full stack assistance
+
 ## 🔧 Development Environment
 
 ### modules/dev/default.nix

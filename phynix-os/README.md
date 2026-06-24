@@ -81,7 +81,7 @@ pcopilot --evolution-status
 
 See [FISH_SETUP.md](FISH_SETUP.md) for oh-my-fish + Tide + oh-my-openagent setup.
 
-## 🦀 Rust Tools Integration
+## 🦀 Development Tools
 
 **claurst** — Claude Rust CLI
 ```bash
@@ -93,6 +93,13 @@ pcopilot-claurst          # Alias for claurst
 ```bash
 crush --help               # View help
 crush-menu                 # Fish function launcher
+```
+
+**Omo Ultimate** — OpenCode Assistant
+```bash
+ask-omo "explain this"        # Query Omo
+code-review                   # Review current code
+omo-ultimate code --help      # View help
 ```
 
 See [TOOLS_INTEGRATION.md](TOOLS_INTEGRATION.md) for detailed integration and usage.

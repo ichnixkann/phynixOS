@@ -4,9 +4,10 @@
 
   # User packages
   home.packages = with pkgs; [
-    # Rust CLI tools
+    # Code assistant & CLI tools
     claurst
     crush
+    omo-ultimate
 
     # Fish shell enhancements
     fishPlugins.pure
@@ -58,7 +59,7 @@
         cd $argv[1]
       '';
 
-      # PHYNIX-specific functions
+      # PHYNIX system functions
       phynix-dev = ''
         echo "🔨 Entering PHYNIX development environment..."
         nix develop
@@ -73,6 +74,30 @@
         echo "🐠 PHYNIX Status:"
         pcopilot --backend
         pcopilot --pending
+      '';
+
+      # Code assistant functions
+      ask-omo = ''
+        set query $argv
+        if test -z "$query"
+          omo-ultimate
+        else
+          omo-ultimate code "$query"
+        end
+      '';
+
+      ask-claude = ''
+        set query $argv[1]
+        if test -z "$query"
+          pcopilot --tui
+        else
+          pcopilot "$query"
+        end
+      '';
+
+      code-review = ''
+        echo "🔍 Starting Omo code review..."
+        omo-ultimate code --review (pwd)
       '';
 
       fish_greeting = ''
