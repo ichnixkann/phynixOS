@@ -6,6 +6,7 @@ pkgs.python3Packages.buildPythonApplication {
 
   propagatedBuildInputs = with pkgs.python3Packages; [
     smolagents
+    litellm        # LiteLLMModel backend for Ollama-served models
     huggingface-hub
     chromadb
     requests

@@ -33,6 +33,10 @@ class PhynixCopilot:
         self.llm_backend = self._detect_lm_backend()
         self.interactive = interactive
 
+        # MoC reasoning agent (smolagents). Constructed lazily so that
+        # environments without smolagents still get the keyword router.
+        self.moc_agent = None
+
     def _detect_lm_backend(self) -> str:
         """
         Route LLM backend for CPU-only systems:
@@ -98,7 +102,7 @@ class PhynixCopilot:
         rag_context = self.rag.build_context(query)
 
         # Route query based on keywords
-        response = self._route_query(query)
+        response = self._route_query(query, rag_context)
 
         # Build response with RAG context
         result = {
@@ -111,7 +115,19 @@ class PhynixCopilot:
         self.log_action("query_processed", "success", {"query": query})
         return result
 
-    def _route_query(self, query: str) -> Dict[str, Any]:
+    def _get_moc_agent(self):
+        """Lazily build the smolagents MoC agent; None if unavailable/offline."""
+        if self.moc_agent is None:
+            try:
+                from moc_agent import MoCAgent, set_rag_index
+                set_rag_index(self.rag)  # reuse the already-built RAG index
+                self.moc_agent = MoCAgent(self.llm_backend)
+            except Exception as e:
+                self.log_action("moc_agent_init", "unavailable", {"error": str(e)})
+                self.moc_agent = False  # sentinel: tried and failed
+        return self.moc_agent or None
+
+    def _route_query(self, query: str, rag_context: str = "") -> Dict[str, Any]:
         """Route query to appropriate tool (read-only or write)"""
         query_lower = query.lower()
 
@@ -143,11 +159,18 @@ class PhynixCopilot:
             unit = "phynix-copilot"  # Default unit
             return {"tool": "systemctl_status", "result": self.system_tools.systemctl_status(unit)}
 
-        # Default: Placeholder for LLM-based reasoning
+        # Default: LLM-based reasoning via the MoC smolagents agent.
+        moc = self._get_moc_agent()
+        if moc is not None and moc.available:
+            result = moc.run(query, rag_context)
+            return {"tool": "moc_agent", "backend": self.llm_backend, "result": result}
+
+        # Offline / smolagents unavailable: degrade gracefully.
         return {
             "tool": "llm_reasoning",
             "backend": self.llm_backend,
-            "note": "LLM reasoning pending (read-only tools available)"
+            "note": "MoC reasoning unavailable (offline or smolagents not installed); "
+                    "read-only tools available via keyword routing.",
         }
 
     def run_interactive(self):
