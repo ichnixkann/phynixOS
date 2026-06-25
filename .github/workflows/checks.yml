@@ -1,0 +1,84 @@
+name: Flake Checks (live VM tests)
+
+# Runs every flake `checks.*` output on PRs and pushes to main.
+# The set includes hermetic NixOS VM tests (boot-workstation,
+# copilot-service, installer-iso-boot) plus the pytest suite.
+# Uses GitHub-hosted ubuntu-latest runners (which expose /dev/kvm),
+# so VM boots run at native speed. No third-party signup, no paid
+# services — only the GitHub Actions free tier.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  flake-check:
+    name: nix flake check
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Enable KVM on the runner
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-system-x86 ovmf
+          sudo chmod 666 /dev/kvm
+          ls -la /dev/kvm
+          kvm-ok || true
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: |
+            experimental-features = nix-command flakes
+            system-features = nixos-test benchmark big-parallel kvm
+            accept-flake-config = true
+
+      - name: Cache /nix/store via GHA cache
+        uses: nix-community/cache-nix-action@v6
+        with:
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('phynix-os/flake.lock', 'phynix-os/flake.nix') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+          # Keep cache lean: purge older entries to stay under GHA's
+          # 10 GB per-repo limit. Without this the cache grows without
+          # bound and starts evicting itself unpredictably.
+          purge: true
+          purge-prefixes: nix-${{ runner.os }}-
+          purge-created: 0
+          purge-last-accessed: 604800   # 7 days
+          purge-primary-key: never
+
+      - name: nix flake check
+        working-directory: phynix-os
+        run: nix flake check -L --accept-flake-config
+
+  build-package:
+    name: Build phynix-copilot
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - name: Cache /nix/store via GHA cache
+        uses: nix-community/cache-nix-action@v6
+        with:
+          primary-key: nix-${{ runner.os }}-pkg-${{ hashFiles('phynix-os/flake.lock', 'phynix-os/flake.nix', 'phynix-os/pkgs/**') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+
+      - name: Build packages.default
+        working-directory: phynix-os
+        run: nix build .#packages.x86_64-linux.phynix-copilot -L

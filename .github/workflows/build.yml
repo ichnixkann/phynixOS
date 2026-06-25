@@ -1,8 +1,8 @@
 name: Release PHYNIX OS
 
-# Flake checks (incl. live NixOS VM tests), package builds and the
-# binary cache are handled by Hercules CI — see hercules-ci.nix.
-# This workflow only handles release packaging for tag pushes.
+# Release-time only: builds the installer ISO and publishes a GitHub
+# Release on tag pushes. Flake checks (live VM tests + Python tests)
+# live in checks.yml.
 
 on:
   push:
@@ -13,9 +13,6 @@ permissions:
   contents: write
 
 jobs:
-  # -----------------------------------------------------------------------
-  # Build Installer ISO for release (tags + main)
-  # -----------------------------------------------------------------------
   build-iso:
     name: Build Installer ISO
     runs-on: ubuntu-latest
@@ -29,8 +26,6 @@ jobs:
             experimental-features = nix-command flakes
             max-jobs = auto
             cores = 0
-            substituters = https://cache.nixos.org https://cache.phynix-os.example/phynix
-            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= phynix:PLACEHOLDER_ATTIC_PUBLIC_KEY=
 
       - name: Install nixos-generators
         run: nix profile install nixpkgs#nixos-generators
@@ -62,18 +57,6 @@ jobs:
             ${{ env.ISO_PATH }}.sha256
           retention-days: 7
 
-      - name: Push ISO to Attic cache
-        if: env.ATTIC_TOKEN != ''
-        env:
-          ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
-        run: |
-          nix profile install nixpkgs#attic-client
-          attic login phynix https://cache.phynix-os.example "$ATTIC_TOKEN"
-          attic push phynix "$(readlink -f result-iso)"
-
-  # -----------------------------------------------------------------------
-  # GitHub Release (tag pushes only)
-  # -----------------------------------------------------------------------
   release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
@@ -104,19 +87,17 @@ jobs:
             3. Write to USB: `dd if=phynix-os-*.iso of=/dev/sdX bs=4M status=progress`
             4. Boot and follow the TUI installer
 
-            ### Binary cache
+            ### Copilot
 
-            ```nix
-            nix.settings = {
-              substituters = [ "https://cache.phynix-os.example/phynix" ];
-              trusted-public-keys = [ "phynix:PLACEHOLDER_ATTIC_PUBLIC_KEY=" ];
-            };
+            ```bash
+            pcopilot --backend
+            pcopilot --reindex
+            pcopilot "how do I..."
             ```
 
             ### Links
 
             - Documentation: [PHYNIX OS Docs](https://github.com/${{ github.repository }})
-            - CI: [Hercules CI](https://hercules-ci.com)
             - Mirror: [Codeberg](https://codeberg.org/phynix-os/phynix-os)
           draft: false
           prerelease: ${{ contains(github.ref_name, '-rc') || contains(github.ref_name, '-alpha') || contains(github.ref_name, '-beta') }}

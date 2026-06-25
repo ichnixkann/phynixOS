@@ -2,8 +2,8 @@
 
 > A self-evolving NixOS distribution with an integrated AI Copilot — built for power users who want their system to understand itself.
 
+[![Checks](https://github.com/ichnixkann/phynixOS/actions/workflows/checks.yml/badge.svg)](https://github.com/ichnixkann/phynixOS/actions/workflows/checks.yml)
 [![Release](https://github.com/ichnixkann/phynixOS/actions/workflows/build.yml/badge.svg)](https://github.com/ichnixkann/phynixOS/actions/workflows/build.yml)
-[![Hercules CI](https://img.shields.io/badge/CI-Hercules-yellow)](https://hercules-ci.com)
 
 > Canonical FOSS mirror: [codeberg.org/phynix-os/phynix-os](https://codeberg.org/phynix-os/phynix-os)
 
@@ -41,21 +41,8 @@ PHYNIX OS is a NixOS-based Linux distribution that ships with a self-modifying A
 
 ### Binary Cache
 
-All flake outputs are built by [Hercules CI](https://hercules-ci.com) and
-published to a self-hosted [Attic](https://github.com/zhaofengli/attic)
-cache. No Cachix, no proprietary SaaS in the build path. Add the cache
-to `configuration.nix` to avoid rebuilding:
-
-```nix
-nix.settings = {
-  substituters = [ "https://cache.phynix-os.example/phynix" ];
-  trusted-public-keys = [ "phynix:PLACEHOLDER_ATTIC_PUBLIC_KEY=" ];
-};
-```
-
-(Replace the placeholder host + key with the values printed by
-`atticadm cache info phynix` when the cache is provisioned —
-see [`docs/infra/attic-deploy.md`](./docs/infra/attic-deploy.md).)
+There is no project-owned cache yet (open follow-up). For now, every
+build pulls from `cache.nixos.org`.
 
 ---
 
@@ -166,36 +153,39 @@ phynix-os/
 
 ## CI/CD
 
-Nix builds and **live, sandboxed VM tests** run on
-**[Hercules CI](https://hercules-ci.com)** — a Nix-native CI that's free
-for public OSS, with a fully open-source agent (`hercules-ci-agent`).
-Hercules picks up every flake output declared in
-[`hercules-ci.nix`](./hercules-ci.nix) and posts a status check per
-output on each PR.
+Everything runs on GitHub Actions free runners. No third-party signups,
+no paid services. The runners expose `/dev/kvm`, so the NixOS VM tests
+boot real virtual machines at native speed.
 
-The flake `checks.x86_64-linux.*` set includes:
+### `checks.yml` — live sandbox tests on every PR
+
+Runs every flake `checks.x86_64-linux.*` output:
 
 | Check | What it covers |
 |-------|----------------|
-| `boot-workstation`   | Boots a VM with the phynix modules; asserts multi-user.target + copilot service registered |
-| `copilot-service`    | Minimal VM; asserts `pcopilot --backend` exits 0 with no LLM |
+| `boot-workstation`   | Boots a VM with the phynix modules; asserts `multi-user.target` + copilot user-service registered |
+| `copilot-service`    | Minimal VM; asserts `pcopilot --backend` exits 0 with no LLM available |
 | `installer-iso-boot` | Boots the installer ISO; asserts the TUI installer is on PATH |
-| `python-unit`        | pytest suite under `phynix-os/pkgs/phynix-copilot/tests/` |
+| `python-unit`        | pytest suite under [`phynix-os/pkgs/phynix-copilot/tests/`](./phynix-os/pkgs/phynix-copilot/tests/) |
 
-GitHub Actions is used only for things Hercules doesn't cover:
+Plus a second job that builds `packages.phynix-copilot` so package
+regressions are caught even when tests pass. The Nix store is cached
+across runs via [`nix-community/cache-nix-action`](https://github.com/nix-community/cache-nix-action)
+(GitHub Actions cache, free, OSS).
+
+### Other workflows
 
 | Workflow | Trigger | Description |
 |----------|---------|-------------|
-| `build.yml` → `build-iso` | main + tags | Build installer ISO + push to Attic cache |
-| `build.yml` → `release`   | `v*` tags    | GitHub Release with ISO + sha256 |
-| `mirror.yml`              | main + tags  | Mirror repository to Codeberg |
+| `build.yml` → `build-iso` | main + tags | Build installer ISO |
+| `build.yml` → `release`   | `v*` tags   | GitHub Release with ISO + sha256 |
+| `mirror.yml`              | main + tags | Mirror repository to Codeberg |
 
 Required secrets:
-- `ATTIC_TOKEN` — write token for the Attic cache (used by Hercules and by the ISO job)
 - `CODEBERG_SSH_KEY` — Codeberg deploy key for the mirror
 
-See [`docs/infra/attic-deploy.md`](./docs/infra/attic-deploy.md) for the
-cache deployment recipe.
+See [`phynix-os/tests/README.md`](./phynix-os/tests/README.md) for how
+to run the VM tests locally and drive them interactively.
 
 ---
 

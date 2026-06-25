@@ -9,14 +9,9 @@
     };
     hyprland.url = "github:hyprwm/hyprland/main";
     flake-utils.url = "github:numtide/flake-utils";
-
-    hercules-ci-effects = {
-      url = "github:hercules-ci/hercules-ci-effects";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
-  outputs = { self, nixpkgs, home-manager, hyprland, flake-utils, hercules-ci-effects, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, hyprland, flake-utils, ... }@inputs:
     let
       mkPkgs = system:
         (nixpkgs.legacyPackages.${system}).extend (final: prev:
