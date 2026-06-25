@@ -165,7 +165,7 @@ Runs every flake `checks.x86_64-linux.*` output:
 |-------|----------------|
 | `boot-workstation`   | Boots a VM with the phynix modules; asserts `multi-user.target` + copilot user-service registered |
 | `copilot-service`    | Minimal VM; asserts `pcopilot --backend` exits 0 with no LLM available |
-| `installer-iso-boot` | Boots the installer ISO; asserts the TUI installer is on PATH |
+| `installer-iso-build` | Realises the installer ISO image end-to-end |
 | `python-unit`        | pytest suite under [`phynix-os/pkgs/phynix-copilot/tests/`](./phynix-os/pkgs/phynix-copilot/tests/) |
 
 Plus a second job that builds `packages.phynix-copilot` so package
