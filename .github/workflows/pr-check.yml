@@ -1,5 +1,8 @@
 name: PR Checks
 
+# Nix flake validation and package builds are handled by Garnix
+# (see garnix.yaml). This workflow only covers fast Python feedback.
+
 on:
   pull_request:
     branches: [main]
@@ -16,7 +19,7 @@ jobs:
       - name: Syntax check
         run: |
           for f in phynix-os/pkgs/phynix-copilot/*.py; do
-            python3 -m py_compile "$f" && echo "✓ $f"
+            python3 -m py_compile "$f" && echo "ok $f"
           done
       - name: RAG + routing smoke test
         run: |
@@ -32,17 +35,5 @@ jobs:
               assert r['total_chunks'] > 0
               hits = rag.search("hyprland keybind")
               assert hits
-              print(f"✓ RAG smoke test: {r['total_chunks']} docs, search OK")
+              print(f"RAG smoke test: {r['total_chunks']} docs, search OK")
           EOF
-
-  nix-check:
-    name: Nix Flake Validate
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: cachix/install-nix-action@v27
-        with:
-          extra_nix_config: |
-            experimental-features = nix-command flakes
-      - name: Flake check (no build)
-        run: nix flake check ./phynix-os --no-build

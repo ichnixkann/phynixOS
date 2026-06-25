@@ -2,8 +2,11 @@
 
 > A self-evolving NixOS distribution with an integrated AI Copilot — built for power users who want their system to understand itself.
 
-[![CI](https://github.com/ichnixkann/phynixOS/actions/workflows/build.yml/badge.svg)](https://github.com/ichnixkann/phynixOS/actions/workflows/build.yml)
+[![Release](https://github.com/ichnixkann/phynixOS/actions/workflows/build.yml/badge.svg)](https://github.com/ichnixkann/phynixOS/actions/workflows/build.yml)
 [![PR Checks](https://github.com/ichnixkann/phynixOS/actions/workflows/pr-check.yml/badge.svg)](https://github.com/ichnixkann/phynixOS/actions/workflows/pr-check.yml)
+[![Built by Garnix](https://img.shields.io/badge/built%20by-garnix.io-blue)](https://garnix.io)
+
+> Canonical FOSS mirror: [codeberg.org/phynix-os/phynix-os](https://codeberg.org/phynix-os/phynix-os)
 
 ---
 
@@ -39,14 +42,15 @@ PHYNIX OS is a NixOS-based Linux distribution that ships with a self-modifying A
 
 ### Binary Cache
 
-Add the Cachix binary cache to avoid rebuilding:
+All flake outputs are built by [Garnix](https://garnix.io) and published to
+the public `cache.garnix.io` binary cache — no Cachix, no proprietary
+infrastructure. Add it to `configuration.nix` to avoid rebuilding:
 
 ```nix
-# configuration.nix
 nix.settings = {
-  substituters = [ "https://phynix.cachix.org" ];
+  substituters = [ "https://cache.garnix.io" ];
   trusted-public-keys = [
-    "phynix.cachix.org-1:PLACEHOLDER_KEY="
+    "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
   ];
 };
 ```
@@ -160,15 +164,23 @@ phynix-os/
 
 ## CI/CD
 
-| Job | Trigger | Description |
-|-----|---------|-------------|
-| `flake-check` | PRs + push | `nix flake check --no-build` |
-| `build-copilot` | PRs + push | Build + push to Cachix |
-| `build-iso` | main/tags | Full ISO via nixos-generators |
-| `release` | `v*` tags | GitHub Release with ISO + sha256 |
-| `python-tests` | PRs + push | Syntax, imports, RAG, routing |
+Nix builds run on **[Garnix](https://garnix.io)** — a Nix-native CI that's
+free for public open-source repos and publishes results to the public
+`cache.garnix.io` binary cache. The set of flake outputs Garnix builds is
+declared in [`garnix.yaml`](./garnix.yaml).
 
-Required secret: `CACHIX_AUTH_TOKEN` (set in repo Settings → Secrets → Actions).
+GitHub Actions is used only for things Garnix doesn't cover:
+
+| Workflow | Trigger | Description |
+|----------|---------|-------------|
+| Garnix (per output) | PRs + push | Flake check, package + NixOS + ISO builds, cache push |
+| `build.yml` → `build-iso` | main/tags | Build installer ISO for release artifact |
+| `build.yml` → `release` | `v*` tags | GitHub Release with ISO + sha256 |
+| `build.yml` → `python-tests` | PRs + push | Python syntax, imports, RAG, routing |
+| `pr-check.yml` → `syntax` | PRs | Fast Python feedback on PRs |
+| `mirror.yml` | main/tags | Mirror repository to Codeberg |
+
+Required secret: `CODEBERG_SSH_KEY` (Codeberg deploy key for the mirror).
 
 ---
 

@@ -130,7 +130,21 @@ nix build .#phynix-copilot              # Build agent standalone
 | 2 | Self-evolution, TUI, Shell integration | ✅ Complete |
 | 3 | Write-mode tools, Home Manager autonomy | ✅ Complete |
 | 4 | ChromaDB ingestion, Installer TUI | ⏳ Pending |
-| 5 | Branding, Cachix, Public launch | ⏳ Pending |
+| 5 | Branding, Garnix cache, Public launch | ⏳ Pending |
+
+## 📦 Binary Cache
+
+Builds run on [Garnix](https://garnix.io) and are published to
+`cache.garnix.io`:
+
+```nix
+nix.settings = {
+  substituters = [ "https://cache.garnix.io" ];
+  trusted-public-keys = [
+    "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
+  ];
+};
+```
 
 See [PHASE_1.md](PHASE_1.md), [PHASE_2.md](PHASE_2.md), and [PHASE_3.md](PHASE_3.md) for architecture.
 

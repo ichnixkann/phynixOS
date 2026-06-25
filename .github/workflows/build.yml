@@ -1,4 +1,8 @@
-name: Build & Release PHYNIX OS
+name: Release PHYNIX OS
+
+# Nix builds and the binary cache are handled by Garnix
+# (see garnix.yaml). This workflow only handles release packaging
+# for tag pushes and the Python agent tests, which don't need Nix.
 
 on:
   push:
@@ -8,77 +12,15 @@ on:
     branches: [main]
 
 permissions:
-  contents: write     # needed for creating GitHub Releases
-  packages: write
+  contents: write
 
 jobs:
   # -----------------------------------------------------------------------
-  # 1. Validate flake
-  # -----------------------------------------------------------------------
-  flake-check:
-    name: Flake Check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: cachix/install-nix-action@v27
-        with:
-          nix_path: nixpkgs=channel:nixos-unstable
-          extra_nix_config: |
-            experimental-features = nix-command flakes
-            accept-flake-config = true
-
-      - uses: cachix/cachix-action@v15
-        with:
-          name: phynix
-          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-        continue-on-error: true   # graceful if token not set yet
-
-      - name: Check flake
-        run: nix flake check ./phynix-os --no-build
-        working-directory: ${{ github.workspace }}
-
-  # -----------------------------------------------------------------------
-  # 2. Build Copilot package
-  # -----------------------------------------------------------------------
-  build-copilot:
-    name: Build phynix-copilot
-    runs-on: ubuntu-latest
-    needs: flake-check
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: cachix/install-nix-action@v27
-        with:
-          nix_path: nixpkgs=channel:nixos-unstable
-          extra_nix_config: |
-            experimental-features = nix-command flakes
-
-      - uses: cachix/cachix-action@v15
-        with:
-          name: phynix
-          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-        continue-on-error: true
-
-      - name: Build phynix-copilot
-        run: nix build ./phynix-os#phynix-copilot --print-build-logs
-        working-directory: ${{ github.workspace }}
-
-      - name: Push to Cachix
-        if: github.ref == 'refs/heads/main' && env.CACHIX_AUTH_TOKEN != ''
-        env:
-          CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
-        run: |
-          nix build ./phynix-os#phynix-copilot --print-out-paths | \
-            cachix push phynix
-
-  # -----------------------------------------------------------------------
-  # 3. Build Installer ISO (only on tags / main)
+  # Build Installer ISO for release (tags + main only)
   # -----------------------------------------------------------------------
   build-iso:
     name: Build Installer ISO
     runs-on: ubuntu-latest
-    needs: flake-check
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
     steps:
       - uses: actions/checkout@v4
@@ -88,15 +30,10 @@ jobs:
           nix_path: nixpkgs=channel:nixos-unstable
           extra_nix_config: |
             experimental-features = nix-command flakes
-            # Allow large builds
             max-jobs = auto
             cores = 0
-
-      - uses: cachix/cachix-action@v15
-        with:
-          name: phynix
-          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-        continue-on-error: true
+            substituters = https://cache.nixos.org https://cache.garnix.io
+            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=
 
       - name: Install nixos-generators
         run: nix profile install nixpkgs#nixos-generators
@@ -129,12 +66,12 @@ jobs:
           retention-days: 7
 
   # -----------------------------------------------------------------------
-  # 4. GitHub Release (tag pushes only)
+  # GitHub Release (tag pushes only)
   # -----------------------------------------------------------------------
   release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
-    needs: [build-copilot, build-iso]
+    needs: [build-iso]
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
       - uses: actions/checkout@v4
@@ -150,18 +87,18 @@ jobs:
         with:
           name: "PHYNIX OS ${{ github.ref_name }}"
           body: |
-            ## 🔥 PHYNIX OS ${{ github.ref_name }}
+            ## PHYNIX OS ${{ github.ref_name }}
 
             NixOS-based distribution with integrated AI Copilot.
 
-            ### 📥 Installation
+            ### Installation
 
             1. Download the ISO below
             2. Verify checksum: `sha256sum -c phynix-os-*.iso.sha256`
             3. Write to USB: `dd if=phynix-os-*.iso of=/dev/sdX bs=4M status=progress`
             4. Boot and follow the TUI installer
 
-            ### 🤖 Copilot
+            ### Copilot
 
             After installation:
             ```bash
@@ -170,16 +107,21 @@ jobs:
             pcopilot "how do I..."      # Ask anything NixOS-related
             ```
 
-            ### 📦 Binary Cache
+            ### Binary Cache (Garnix)
 
             ```nix
-            nix.settings.substituters = [ "https://phynix.cachix.org" ];
+            nix.settings = {
+              substituters = [ "https://cache.garnix.io" ];
+              trusted-public-keys = [
+                "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
+              ];
+            };
             ```
 
-            ### 🔗 Links
+            ### Links
 
             - Documentation: [PHYNIX OS Docs](https://github.com/${{ github.repository }})
-            - Binary Cache: [phynix.cachix.org](https://phynix.cachix.org)
+            - Builds & cache: [Garnix](https://garnix.io)
           draft: false
           prerelease: ${{ contains(github.ref_name, '-rc') || contains(github.ref_name, '-alpha') || contains(github.ref_name, '-beta') }}
           files: |
@@ -187,7 +129,7 @@ jobs:
             ./release/*.sha256
 
   # -----------------------------------------------------------------------
-  # 5. Python tests (copilot agent)
+  # Python tests (copilot agent) — no Nix required
   # -----------------------------------------------------------------------
   python-tests:
     name: Python Agent Tests
@@ -209,7 +151,7 @@ jobs:
       - name: Syntax check
         run: |
           for f in phynix-os/pkgs/phynix-copilot/*.py; do
-            python3 -m py_compile "$f" && echo "✓ $f"
+            python3 -m py_compile "$f" && echo "ok $f"
           done
 
       - name: Module import tests
@@ -221,11 +163,11 @@ jobs:
           for mod in ['tools', 'rag', 'evolution', 'completions', 'write_tools', 'write_agent']:
               try:
                   __import__(mod)
-                  print(f"✓ {mod}")
+                  print(f"ok {mod}")
               except ImportError as e:
-                  print(f"⚠ {mod} (missing optional dep): {e}")
+                  print(f"skip {mod} (missing optional dep): {e}")
               except Exception as e:
-                  print(f"✗ {mod}: {e}")
+                  print(f"fail {mod}: {e}")
                   sys.exit(1)
           EOF
 
@@ -244,8 +186,8 @@ jobs:
 
               results = rag.search("pipewire audio", top_k=2)
               assert results, "Search returned nothing"
-              print(f"✓ RAG: {result['total_chunks']} chunks indexed")
-              print(f"✓ Search: '{results[0]['title']}' score={results[0]['relevance']}")
+              print(f"RAG: {result['total_chunks']} chunks indexed")
+              print(f"Search: '{results[0]['title']}' score={results[0]['relevance']}")
           EOF
 
       - name: Agent routing test
@@ -270,5 +212,5 @@ jobs:
           for query, expected in cases:
               got = c._route_query(query)["tool"]
               assert got == expected, f"'{query}': expected {expected}, got {got}"
-              print(f"✓ '{query}' → {got}")
+              print(f"ok '{query}' -> {got}")
           EOF
