@@ -25,6 +25,6 @@ pkgs.python3Packages.buildPythonApplication {
 
   meta = {
     description = "PHYNIX OS Copilot — AI Assistant for NixOS Configuration";
-    license = pkgs.lib.licenses.mit;
+    license = pkgs.lib.licenses.lgpl3Plus;
   };
 }

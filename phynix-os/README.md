@@ -130,7 +130,14 @@ nix build .#phynix-copilot              # Build agent standalone
 | 2 | Self-evolution, TUI, Shell integration | ✅ Complete |
 | 3 | Write-mode tools, Home Manager autonomy | ✅ Complete |
 | 4 | ChromaDB ingestion, Installer TUI | ⏳ Pending |
-| 5 | Branding, Cachix, Public launch | ⏳ Pending |
+| 5 | Branding, project-owned binary cache, Public launch | ⏳ Pending |
+
+## 🧪 Live VM Tests
+
+Hermetic NixOS VM tests run on every PR via GitHub Actions
+(`.github/workflows/checks.yml`). See [`tests/README.md`](./tests/README.md)
+for the test catalogue and recipes for running locally / driving a VM
+interactively.
 
 See [PHASE_1.md](PHASE_1.md), [PHASE_2.md](PHASE_2.md), and [PHASE_3.md](PHASE_3.md) for architecture.
 

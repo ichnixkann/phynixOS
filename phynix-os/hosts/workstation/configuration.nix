@@ -8,6 +8,8 @@
 
   boot.loader.grub.device = "/dev/sda";
 
+  nixpkgs.config.allowUnfree = true;
+
   networking.hostName = "phynix-workstation";
   networking.networkmanager.enable = true;
 
