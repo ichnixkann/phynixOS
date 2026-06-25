@@ -88,23 +88,24 @@
           copilot-service    = import ./tests/copilot-service.nix    { inherit pkgs self; };
           installer-iso-boot = import ./tests/installer-iso-boot.nix { inherit pkgs self; };
 
-          python-unit = pkgs.runCommand "phynix-copilot-pytest"
-            {
-              nativeBuildInputs = with pkgs.python3Packages; [
-                python3
+          python-unit =
+            let
+              pythonEnv = pkgs.python3.withPackages (ps: with ps; [
                 pytest
                 pydantic
                 requests
                 rich
-              ];
-            }
-            ''
-              cp -r ${./pkgs/phynix-copilot} src
-              chmod -R +w src
-              cd src
-              python -m pytest tests/ -v
-              touch $out
-            '';
+              ]);
+            in
+            pkgs.runCommand "phynix-copilot-pytest"
+              { nativeBuildInputs = [ pythonEnv ]; }
+              ''
+                cp -r ${./pkgs/phynix-copilot} src
+                chmod -R +w src
+                cd src
+                python -m pytest tests/ -v
+                touch $out
+              '';
         };
       }
     ) // {

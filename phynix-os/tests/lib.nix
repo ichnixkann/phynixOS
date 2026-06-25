@@ -16,7 +16,9 @@ in
 pkgs.testers.runNixOSTest ({
   inherit name testScript;
 
-  hostPkgs = pkgs;
+  # `hostPkgs` is bound automatically by pkgs.testers.runNixOSTest from
+  # the surrounding pkgs argument; setting it again here triggers a
+  # "defined multiple times" module-system error.
 
   # Every test gets a phynix user, journald limits raised so the test
   # script can grep journals reliably, and enough RAM for systemd-user
