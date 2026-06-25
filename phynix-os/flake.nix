@@ -36,14 +36,22 @@
               rich
             ];
 
+            # cli.py does `from agent import …`, so the sibling .py
+            # modules must be installed alongside it AND that directory
+            # must be on PYTHONPATH at runtime. buildPythonApplication's
+            # wrapPythonPrograms phase honours makeWrapperArgs.
             postInstall = ''
+              mkdir -p $out/share/phynix-copilot
+              cp $src/*.py $out/share/phynix-copilot/
+
               mkdir -p $out/bin
               cp $src/cli.py $out/bin/pcopilot
               chmod +x $out/bin/pcopilot
-
-              mkdir -p $out/share/phynix-copilot
-              cp $src/completions.py $out/share/phynix-copilot/
             '';
+
+            makeWrapperArgs = [
+              "--prefix" "PYTHONPATH" ":" "$out/share/phynix-copilot"
+            ];
 
             meta = {
               description = "PHYNIX OS Copilot — Self-evolving AI Assistant for NixOS";
@@ -84,9 +92,9 @@
         };
 
         checks = {
-          boot-workstation    = import ./tests/boot-workstation.nix    { inherit pkgs self; };
-          copilot-service     = import ./tests/copilot-service.nix     { inherit pkgs self; };
-          installer-iso-build = import ./tests/installer-iso-boot.nix  { inherit pkgs self; };
+          boot-workstation    = import ./tests/boot-workstation.nix    { inherit pkgs self phynixPackages; };
+          copilot-service     = import ./tests/copilot-service.nix     { inherit pkgs self phynixPackages; };
+          installer-iso-build = import ./tests/installer-iso-boot.nix  { inherit pkgs self phynixPackages; };
 
           python-unit =
             let

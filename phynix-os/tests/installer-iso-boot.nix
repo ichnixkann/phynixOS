@@ -1,4 +1,8 @@
-{ pkgs, self }:
+{ pkgs, self, phynixPackages }:
+
+# phynixPackages is unused here (this check just builds the ISO image)
+# but the flake passes it for consistency with the live VM tests.
+let _ = phynixPackages; in
 
 # Build-check for the installer ISO.
 #

@@ -1,4 +1,4 @@
-{ pkgs, self }:
+{ pkgs, self, phynixPackages }:
 
 # Boots a VM with the phynix core + copilot modules composed the same way
 # the workstation host composes them, and asserts the system reaches
@@ -6,7 +6,7 @@
 # user.
 
 let
-  mkTest = import ./lib.nix { inherit pkgs self; };
+  mkTest = import ./lib.nix { inherit pkgs self phynixPackages; };
 in
 mkTest {
   name = "boot-workstation";

@@ -1,11 +1,11 @@
-{ pkgs, self }:
+{ pkgs, self, phynixPackages }:
 
 # Minimal VM that enables only the phynix.copilot module, then asserts
 # the user service starts cleanly and `pcopilot --backend` exits 0 with
 # no LLM available (should report "offline", not crash).
 
 let
-  mkTest = import ./lib.nix { inherit pkgs self; };
+  mkTest = import ./lib.nix { inherit pkgs self phynixPackages; };
 in
 mkTest {
   name = "copilot-service";

@@ -1,4 +1,4 @@
-{ pkgs, self }:
+{ pkgs, self, phynixPackages }:
 
 # Thin wrapper around pkgs.testers.runNixOSTest with phynix-friendly
 # defaults. Each test file imports this and passes a name + nodes +
@@ -24,11 +24,11 @@ pkgs.testers.runNixOSTest ({
   # script can grep journals reliably, and enough RAM for systemd-user
   # plus the Python interpreter the copilot agent spawns.
   defaults = { ... }: {
-    # Modules in this repo (e.g. modules/copilot/default.nix) accept
-    # `phynixPackages` as a module-system arg. The test framework
-    # doesn't pass it, so default it to null here — the modules already
-    # have a fallback for null.
-    _module.args.phynixPackages = null;
+    # Modules in this repo (e.g. modules/copilot/default.nix) consume
+    # `phynixPackages` as a module-system arg. Inject the real flake
+    # package set here so the VM exercises the same artifact users
+    # install — not a stand-in.
+    _module.args.phynixPackages = phynixPackages;
 
     users.users.phynix = {
       isNormalUser = true;
