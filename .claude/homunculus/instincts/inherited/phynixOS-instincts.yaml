@@ -1,0 +1,520 @@
+# Instincts generated from https://github.com/ichnixkann/phynixOS
+# Generated: 2026-06-25T19:12:01.397Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: phynixOS-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/ichnixkann/phynixOS
+---
+
+# PhynixOS Commit Length
+
+## Action
+
+Write moderate-length commit messages (~64 characters)
+
+## Evidence
+
+- Average commit message length: 64 chars
+- Based on 11 commits
+
+---
+id: phynixOS-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/ichnixkann/phynixOS
+---
+
+# PhynixOS Naming Files
+
+## Action
+
+Use camelCase naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: camelCase
+
+---
+id: phynixOS-import-relative
+trigger: "when importing modules"
+confidence: 0.75
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/ichnixkann/phynixOS
+---
+
+# PhynixOS Import Relative
+
+## Action
+
+Use relative imports for project files
+
+## Evidence
+
+- Import analysis shows relative import pattern
+- Example: import { x } from '../lib/x'
+
+---
+id: phynixOS-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/ichnixkann/phynixOS
+---
+
+# PhynixOS Export Style
+
+## Action
+
+Prefer named exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: named
+
+---
+id: phynixOS-test-naming
+trigger: "when creating a test file"
+confidence: 0.85
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/ichnixkann/phynixOS
+---
+
+# PhynixOS Test Naming
+
+## Action
+
+Name test files using the pattern: *.test.ts
+
+## Evidence
+
+- File pattern: *.test.ts
+- Consistent across test files
+
+---
+id: phynixOS-workflow-ci-pipeline-migration-or-refactor
+trigger: "when doing ci pipeline migration or refactor"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/ichnixkann/phynixOS
+---
+
+# PhynixOS Workflow Ci Pipeline Migration Or Refactor
+
+## Action
+
+Follow the ci-pipeline-migration-or-refactor workflow:
+1. Add or remove .github/workflows/*.yml files to reflect new CI jobs.
+2. Add or remove infrastructure config files (e.g., garnix.yaml, hercules-ci.nix).
+3. Update flake.nix and related Nix files to wire in new checks/builds.
+4. Update README.md and phynix-os/README.md to document new CI pipeline.
+5. Remove obsolete infra/docs files (e.g., docs/infra/attic-deploy.md).
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: .github/workflows/*.yml, README.md, phynix-os/README.md
+
+---
+id: phynixOS-workflow-test-harness-fix-or-extension
+trigger: "when doing test harness fix or extension"
+confidence: 0.65
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/ichnixkann/phynixOS
+---
+
+# PhynixOS Workflow Test Harness Fix Or Extension
+
+## Action
+
+Follow the test-harness-fix-or-extension workflow:
+1. Edit phynix-os/tests/lib.nix to fix or extend test harness logic.
+2. Update or add phynix-os/tests/*.nix test files.
+3. Update phynix-os/flake.nix to adjust test wiring or arguments.
+4. Update phynix-os/tests/README.md to document changes.
+5. Sometimes update Python test files under phynix-os/pkgs/phynix-copilot/tests/.
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~3x per month
+- Files: phynix-os/tests/lib.nix, phynix-os/tests/*.nix, phynix-os/flake.nix
+
+---
+id: phynixOS-workflow-readme-and-docs-update-for-infra-or-tests
+trigger: "when doing readme and docs update for infra or tests"
+confidence: 0.65
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/ichnixkann/phynixOS
+---
+
+# PhynixOS Workflow Readme And Docs Update For Infra Or Tests
+
+## Action
+
+Follow the readme-and-docs-update-for-infra-or-tests workflow:
+1. Edit README.md and/or phynix-os/README.md to describe new CI/test setup.
+2. Update or add docs/infra/*.md for new infrastructure or deployment steps.
+3. Rename or update references to test names or workflows in documentation.
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~3x per month
+- Files: README.md, phynix-os/README.md, docs/infra/*.md
+
+---
+id: phynixOS-workflow-flake-nix-wiring-and-module-arg-refactor
+trigger: "when doing flake nix wiring and module arg refactor"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/ichnixkann/phynixOS
+---
+
+# PhynixOS Workflow Flake Nix Wiring And Module Arg Refactor
+
+## Action
+
+Follow the flake-nix-wiring-and-module-arg-refactor workflow:
+1. Edit phynix-os/flake.nix to adjust how packages or arguments are passed to modules/tests.
+2. Edit phynix-os/modules/*/default.nix to update argument handling or drop fallback branches.
+3. Edit phynix-os/tests/lib.nix and test files to receive new arguments.
+4. Update related test files to forward or use the new arguments.
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: phynix-os/flake.nix, phynix-os/modules/*/default.nix, phynix-os/tests/lib.nix
+
+---
+id: phynixos-instinct-file-naming-camelcase
+trigger: "When creating or renaming source files"
+confidence: 0.85
+domain: code-style
+source: repo-analysis
+source_repo: ichnixkann/phynixOS
+---
+
+# Phynixos Instinct File Naming Camelcase
+
+## Action
+
+Use camelCase for file names
+
+## Evidence
+
+- Pattern in namingConventions.files
+- Observed in phynix-os file structure
+
+---
+id: phynixos-instinct-function-naming-camelcase
+trigger: "When defining new functions"
+confidence: 0.85
+domain: code-style
+source: repo-analysis
+source_repo: ichnixkann/phynixOS
+---
+
+# Phynixos Instinct Function Naming Camelcase
+
+## Action
+
+Use camelCase for function names
+
+## Evidence
+
+- Pattern in namingConventions.functions
+- Consistent with Python code style
+
+---
+id: phynixos-instinct-class-naming-pascalcase
+trigger: "When defining new classes"
+confidence: 0.85
+domain: code-style
+source: repo-analysis
+source_repo: ichnixkann/phynixOS
+---
+
+# Phynixos Instinct Class Naming Pascalcase
+
+## Action
+
+Use PascalCase for class names
+
+## Evidence
+
+- Pattern in namingConventions.classes
+
+---
+id: phynixos-instinct-constant-naming-screaming-snake
+trigger: "When defining constants"
+confidence: 0.85
+domain: code-style
+source: repo-analysis
+source_repo: ichnixkann/phynixOS
+---
+
+# Phynixos Instinct Constant Naming Screaming Snake
+
+## Action
+
+Use SCREAMING_SNAKE_CASE for constant names
+
+## Evidence
+
+- Pattern in namingConventions.constants
+
+---
+id: phynixos-instinct-imports-relative
+trigger: "When importing modules in Python code"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: ichnixkann/phynixOS
+---
+
+# Phynixos Instinct Imports Relative
+
+## Action
+
+Use relative imports
+
+## Evidence
+
+- Pattern in importStyle
+- Seen in phynix-os Python code
+
+---
+id: phynixos-instinct-exports-named
+trigger: "When exporting functions or classes"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: ichnixkann/phynixOS
+---
+
+# Phynixos Instinct Exports Named
+
+## Action
+
+Use named exports
+
+## Evidence
+
+- Pattern in exportStyle
+
+---
+id: phynixos-instinct-test-file-pattern
+trigger: "When adding new test files"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: ichnixkann/phynixOS
+---
+
+# Phynixos Instinct Test File Pattern
+
+## Action
+
+Name test files with the pattern *.test.ts
+
+## Evidence
+
+- Pattern in testing.filePattern
+
+---
+id: phynixos-instinct-test-type-unit
+trigger: "When writing new tests"
+confidence: 0.7
+domain: testing
+source: repo-analysis
+source_repo: ichnixkann/phynixOS
+---
+
+# Phynixos Instinct Test Type Unit
+
+## Action
+
+Write unit tests as the primary test type
+
+## Evidence
+
+- Pattern in testing.testTypes
+
+---
+id: phynixos-instinct-test-location-mixed
+trigger: "When deciding where to place test files"
+confidence: 0.7
+domain: testing
+source: repo-analysis
+source_repo: ichnixkann/phynixOS
+---
+
+# Phynixos Instinct Test Location Mixed
+
+## Action
+
+Place test files in mixed locations (not strictly separated from source)
+
+## Evidence
+
+- Pattern in architecture.folderStructure.testLocation
+
+---
+id: phynixos-instinct-commit-prefix-convention
+trigger: "When writing a commit message"
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: ichnixkann/phynixOS
+---
+
+# Phynixos Instinct Commit Prefix Convention
+
+## Action
+
+Prefix the commit message with the relevant type (e.g., tests, ci, fix, docs, license)
+
+## Evidence
+
+- Seen in commit: 'ci: move builds and binary cache to open infrastructure'
+- Seen in commit: 'tests: fix hostPkgs collision and python-unit derivation'
+- Pattern in commits.prefixes
+
+---
+id: phynixos-instinct-commit-length-brief
+trigger: "When composing a commit message"
+confidence: 0.7
+domain: git
+source: repo-analysis
+source_repo: ichnixkann/phynixOS
+---
+
+# Phynixos Instinct Commit Length Brief
+
+## Action
+
+Keep the commit message around 64 characters on average
+
+## Evidence
+
+- Pattern in commits.averageLength
+
+---
+id: phynixos-instinct-commit-scope-detail
+trigger: "When describing the commit scope"
+confidence: 0.8
+domain: git
+source: repo-analysis
+source_repo: ichnixkann/phynixOS
+---
+
+# Phynixos Instinct Commit Scope Detail
+
+## Action
+
+Include the scope in parentheses after the prefix if relevant (e.g., fix(copilot): ...)
+
+## Evidence
+
+- Seen in commit: 'fix(copilot): rewrite systemd unit using NixOS module syntax'
+
+---
+id: phynixos-instinct-workflow-ci-pipeline-migration
+trigger: "When switching CI providers, updating build/test infrastructure, or changing caching/mirroring strategies"
+confidence: 0.95
+domain: workflow
+source: repo-analysis
+source_repo: ichnixkann/phynixOS
+---
+
+# Phynixos Instinct Workflow Ci Pipeline Migration
+
+## Action
+
+Add/remove .github/workflows/*.yml, update infra config files, adjust flake.nix, update relevant READMEs, and remove obsolete infra/docs files
+
+## Evidence
+
+- Workflow: ci-pipeline-migration-or-refactor
+- Seen in commits: 'ci: move builds and binary cache to open infrastructure', 'ci: switch to Hercules CI + self-hosted Attic, add live VM tests'
+
+---
+id: phynixos-instinct-workflow-test-harness-fix
+trigger: "When fixing test harness bugs, adapting to upstream NixOS changes, or extending test coverage"
+confidence: 0.92
+domain: workflow
+source: repo-analysis
+source_repo: ichnixkann/phynixOS
+---
+
+# Phynixos Instinct Workflow Test Harness Fix
+
+## Action
+
+Edit phynix-os/tests/lib.nix, update/add phynix-os/tests/*.nix, adjust flake.nix, update phynix-os/tests/README.md, and sometimes update Python test files
+
+## Evidence
+
+- Workflow: test-harness-fix-or-extension
+- Seen in commit: 'tests: fix hostPkgs collision and python-unit derivation'
+
+---
+id: phynixos-instinct-workflow-docs-update
+trigger: "When CI/test setup or infrastructure changes and documentation needs updating"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: ichnixkann/phynixOS
+---
+
+# Phynixos Instinct Workflow Docs Update
+
+## Action
+
+Edit README.md, phynix-os/README.md, and docs/infra/*.md to reflect new CI/test setup and infra changes
+
+## Evidence
+
+- Workflow: readme-and-docs-update-for-infra-or-tests
+- Seen in commit: 'docs: rename installer-iso-boot to installer-iso-build in top-level README'
+
+---
+id: phynixos-instinct-workflow-flake-nix-refactor
+trigger: "When fixing module argument passing, ensuring modules use the correct package, or resolving evaluation errors in NixOS/Nix flakes"
+confidence: 0.88
+domain: workflow
+source: repo-analysis
+source_repo: ichnixkann/phynixOS
+---
+
+# Phynixos Instinct Workflow Flake Nix Refactor
+
+## Action
+
+Edit phynix-os/flake.nix, update modules/*/default.nix, adjust tests/lib.nix and test files to match new argument wiring
+
+## Evidence
+
+- Workflow: flake-nix-wiring-and-module-arg-refactor
+- Seen in commit: 'tests: unblock flake check (nixpkgs.config conflict, phynixPackages, ISO)'
+
