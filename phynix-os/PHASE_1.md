@@ -103,7 +103,7 @@ All queries logged to `~/.local/state/phynix/audit.jsonl`:
 ## Next Steps (Phase 2)
 
 - [ ] Implement actual ChromaDB indexing
-- [ ] Integrate smolagents CodeAgent with tool registration
+- [x] Integrate smolagents CodeAgent with tool registration (MoC agent, see moc_agent.py)
 - [ ] Add write-mode tools with confirmation gates
 - [ ] Home Manager autonomous apply
 - [ ] TUI interface (Textual)
