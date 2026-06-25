@@ -55,7 +55,7 @@
 
             meta = {
               description = "PHYNIX OS Copilot — Self-evolving AI Assistant for NixOS";
-              license = pkgs.lib.licenses.mit;
+              license = pkgs.lib.licenses.lgpl3Plus;
             };
           };
         };

@@ -191,4 +191,6 @@ to run the VM tests locally and drive them interactively.
 
 ## License
 
-MIT
+LGPL-3.0-or-later. See [`LICENSE`](./LICENSE) (LGPLv3 — the additional
+permissions) and [`COPYING`](./COPYING) (GPLv3, on top of which LGPLv3
+adds those permissions).
