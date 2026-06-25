@@ -39,9 +39,11 @@ mkTest {
     assert out.strip(), f"pcopilot --backend produced no output: {out!r}"
 
     # The systemd user unit is reachable.
+    # See note in boot-workstation.nix: from root we have to go through
+    # the user manager's bus with `--machine=phynix@.host`, since
+    # runuser doesn't set XDG_RUNTIME_DIR / DBus session env.
     machine.succeed(
-        "runuser -u phynix -- "
-        "systemctl --user list-unit-files phynix-copilot.service "
+        "systemctl --user -M phynix@.host list-unit-files phynix-copilot.service "
         "| grep -q phynix-copilot"
     )
   '';

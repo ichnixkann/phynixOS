@@ -42,9 +42,13 @@ mkTest {
     machine.succeed("pcopilot --help >/dev/null")
 
     # The user-service unit is installed for the phynix user.
+    # `runuser` / `su` don't set up XDG_RUNTIME_DIR + the DBus session
+    # bus, so `systemctl --user` can't reach the user manager that way.
+    # `--machine=phynix@.host` connects from root straight to the
+    # phynix user's bus, which lingering already brought up.
     machine.wait_until_succeeds("loginctl show-user phynix >/dev/null 2>&1 || loginctl enable-linger phynix")
     machine.succeed(
-        "su - phynix -c 'systemctl --user list-unit-files phynix-copilot.service' "
+        "systemctl --user -M phynix@.host list-unit-files phynix-copilot.service "
         "| grep -q phynix-copilot"
     )
   '';
