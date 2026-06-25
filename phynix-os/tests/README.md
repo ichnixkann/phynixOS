@@ -39,7 +39,7 @@ nix build ./phynix-os#checks.x86_64-linux.boot-workstation.driverInteractive
 |------|----------------|
 | `boot-workstation`   | Core + copilot modules compose, system reaches `multi-user.target`, `pcopilot` on PATH |
 | `copilot-service`    | `phynix-copilot.service` registers for the phynix user; `pcopilot --backend` exits 0 with no LLM |
-| `installer-iso-boot` | Installer ISO actually boots and the TUI installer binary is present |
+| `installer-iso-build` | Installer ISO builds end-to-end (build check; true boot test is a follow-up) |
 | `python-unit`        | The pytest suite under `pkgs/phynix-copilot/tests/` |
 
 ## Adding a test

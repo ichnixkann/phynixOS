@@ -84,9 +84,9 @@
         };
 
         checks = {
-          boot-workstation   = import ./tests/boot-workstation.nix   { inherit pkgs self; };
-          copilot-service    = import ./tests/copilot-service.nix    { inherit pkgs self; };
-          installer-iso-boot = import ./tests/installer-iso-boot.nix { inherit pkgs self; };
+          boot-workstation    = import ./tests/boot-workstation.nix    { inherit pkgs self; };
+          copilot-service     = import ./tests/copilot-service.nix     { inherit pkgs self; };
+          installer-iso-build = import ./tests/installer-iso-boot.nix  { inherit pkgs self; };
 
           python-unit =
             let

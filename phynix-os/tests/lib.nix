@@ -24,6 +24,12 @@ pkgs.testers.runNixOSTest ({
   # script can grep journals reliably, and enough RAM for systemd-user
   # plus the Python interpreter the copilot agent spawns.
   defaults = { ... }: {
+    # Modules in this repo (e.g. modules/copilot/default.nix) accept
+    # `phynixPackages` as a module-system arg. The test framework
+    # doesn't pass it, so default it to null here — the modules already
+    # have a fallback for null.
+    _module.args.phynixPackages = null;
+
     users.users.phynix = {
       isNormalUser = true;
       password = "phynix";
