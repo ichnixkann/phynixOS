@@ -3,8 +3,7 @@
 > A self-evolving NixOS distribution with an integrated AI Copilot — built for power users who want their system to understand itself.
 
 [![Release](https://github.com/ichnixkann/phynixOS/actions/workflows/build.yml/badge.svg)](https://github.com/ichnixkann/phynixOS/actions/workflows/build.yml)
-[![PR Checks](https://github.com/ichnixkann/phynixOS/actions/workflows/pr-check.yml/badge.svg)](https://github.com/ichnixkann/phynixOS/actions/workflows/pr-check.yml)
-[![Built by Garnix](https://img.shields.io/badge/built%20by-garnix.io-blue)](https://garnix.io)
+[![Hercules CI](https://img.shields.io/badge/CI-Hercules-yellow)](https://hercules-ci.com)
 
 > Canonical FOSS mirror: [codeberg.org/phynix-os/phynix-os](https://codeberg.org/phynix-os/phynix-os)
 
@@ -42,18 +41,21 @@ PHYNIX OS is a NixOS-based Linux distribution that ships with a self-modifying A
 
 ### Binary Cache
 
-All flake outputs are built by [Garnix](https://garnix.io) and published to
-the public `cache.garnix.io` binary cache — no Cachix, no proprietary
-infrastructure. Add it to `configuration.nix` to avoid rebuilding:
+All flake outputs are built by [Hercules CI](https://hercules-ci.com) and
+published to a self-hosted [Attic](https://github.com/zhaofengli/attic)
+cache. No Cachix, no proprietary SaaS in the build path. Add the cache
+to `configuration.nix` to avoid rebuilding:
 
 ```nix
 nix.settings = {
-  substituters = [ "https://cache.garnix.io" ];
-  trusted-public-keys = [
-    "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
-  ];
+  substituters = [ "https://cache.phynix-os.example/phynix" ];
+  trusted-public-keys = [ "phynix:PLACEHOLDER_ATTIC_PUBLIC_KEY=" ];
 };
 ```
+
+(Replace the placeholder host + key with the values printed by
+`atticadm cache info phynix` when the cache is provisioned —
+see [`docs/infra/attic-deploy.md`](./docs/infra/attic-deploy.md).)
 
 ---
 
@@ -164,23 +166,36 @@ phynix-os/
 
 ## CI/CD
 
-Nix builds run on **[Garnix](https://garnix.io)** — a Nix-native CI that's
-free for public open-source repos and publishes results to the public
-`cache.garnix.io` binary cache. The set of flake outputs Garnix builds is
-declared in [`garnix.yaml`](./garnix.yaml).
+Nix builds and **live, sandboxed VM tests** run on
+**[Hercules CI](https://hercules-ci.com)** — a Nix-native CI that's free
+for public OSS, with a fully open-source agent (`hercules-ci-agent`).
+Hercules picks up every flake output declared in
+[`hercules-ci.nix`](./hercules-ci.nix) and posts a status check per
+output on each PR.
 
-GitHub Actions is used only for things Garnix doesn't cover:
+The flake `checks.x86_64-linux.*` set includes:
+
+| Check | What it covers |
+|-------|----------------|
+| `boot-workstation`   | Boots a VM with the phynix modules; asserts multi-user.target + copilot service registered |
+| `copilot-service`    | Minimal VM; asserts `pcopilot --backend` exits 0 with no LLM |
+| `installer-iso-boot` | Boots the installer ISO; asserts the TUI installer is on PATH |
+| `python-unit`        | pytest suite under `phynix-os/pkgs/phynix-copilot/tests/` |
+
+GitHub Actions is used only for things Hercules doesn't cover:
 
 | Workflow | Trigger | Description |
 |----------|---------|-------------|
-| Garnix (per output) | PRs + push | Flake check, package + NixOS + ISO builds, cache push |
-| `build.yml` → `build-iso` | main/tags | Build installer ISO for release artifact |
-| `build.yml` → `release` | `v*` tags | GitHub Release with ISO + sha256 |
-| `build.yml` → `python-tests` | PRs + push | Python syntax, imports, RAG, routing |
-| `pr-check.yml` → `syntax` | PRs | Fast Python feedback on PRs |
-| `mirror.yml` | main/tags | Mirror repository to Codeberg |
+| `build.yml` → `build-iso` | main + tags | Build installer ISO + push to Attic cache |
+| `build.yml` → `release`   | `v*` tags    | GitHub Release with ISO + sha256 |
+| `mirror.yml`              | main + tags  | Mirror repository to Codeberg |
 
-Required secret: `CODEBERG_SSH_KEY` (Codeberg deploy key for the mirror).
+Required secrets:
+- `ATTIC_TOKEN` — write token for the Attic cache (used by Hercules and by the ISO job)
+- `CODEBERG_SSH_KEY` — Codeberg deploy key for the mirror
+
+See [`docs/infra/attic-deploy.md`](./docs/infra/attic-deploy.md) for the
+cache deployment recipe.
 
 ---
 

@@ -130,21 +130,23 @@ nix build .#phynix-copilot              # Build agent standalone
 | 2 | Self-evolution, TUI, Shell integration | ✅ Complete |
 | 3 | Write-mode tools, Home Manager autonomy | ✅ Complete |
 | 4 | ChromaDB ingestion, Installer TUI | ⏳ Pending |
-| 5 | Branding, Garnix cache, Public launch | ⏳ Pending |
+| 5 | Branding, self-hosted Attic cache, Public launch | ⏳ Pending |
 
 ## 📦 Binary Cache
 
-Builds run on [Garnix](https://garnix.io) and are published to
-`cache.garnix.io`:
+Builds run on [Hercules CI](https://hercules-ci.com) and are pushed to a
+self-hosted [Attic](https://github.com/zhaofengli/attic) cache:
 
 ```nix
 nix.settings = {
-  substituters = [ "https://cache.garnix.io" ];
-  trusted-public-keys = [
-    "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
-  ];
+  substituters = [ "https://cache.phynix-os.example/phynix" ];
+  trusted-public-keys = [ "phynix:PLACEHOLDER_ATTIC_PUBLIC_KEY=" ];
 };
 ```
+
+See [`../docs/infra/attic-deploy.md`](../docs/infra/attic-deploy.md) for
+the cache deployment recipe and [`tests/README.md`](./tests/README.md)
+for the live VM test suite.
 
 See [PHASE_1.md](PHASE_1.md), [PHASE_2.md](PHASE_2.md), and [PHASE_3.md](PHASE_3.md) for architecture.
 

@@ -1,27 +1,24 @@
 name: Release PHYNIX OS
 
-# Nix builds and the binary cache are handled by Garnix
-# (see garnix.yaml). This workflow only handles release packaging
-# for tag pushes and the Python agent tests, which don't need Nix.
+# Flake checks (incl. live NixOS VM tests), package builds and the
+# binary cache are handled by Hercules CI — see hercules-ci.nix.
+# This workflow only handles release packaging for tag pushes.
 
 on:
   push:
     branches: [main]
     tags:     ['v*']
-  pull_request:
-    branches: [main]
 
 permissions:
   contents: write
 
 jobs:
   # -----------------------------------------------------------------------
-  # Build Installer ISO for release (tags + main only)
+  # Build Installer ISO for release (tags + main)
   # -----------------------------------------------------------------------
   build-iso:
     name: Build Installer ISO
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
     steps:
       - uses: actions/checkout@v4
 
@@ -32,8 +29,8 @@ jobs:
             experimental-features = nix-command flakes
             max-jobs = auto
             cores = 0
-            substituters = https://cache.nixos.org https://cache.garnix.io
-            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=
+            substituters = https://cache.nixos.org https://cache.phynix-os.example/phynix
+            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= phynix:PLACEHOLDER_ATTIC_PUBLIC_KEY=
 
       - name: Install nixos-generators
         run: nix profile install nixpkgs#nixos-generators
@@ -64,6 +61,15 @@ jobs:
             ${{ env.ISO_PATH }}
             ${{ env.ISO_PATH }}.sha256
           retention-days: 7
+
+      - name: Push ISO to Attic cache
+        if: env.ATTIC_TOKEN != ''
+        env:
+          ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
+        run: |
+          nix profile install nixpkgs#attic-client
+          attic login phynix https://cache.phynix-os.example "$ATTIC_TOKEN"
+          attic push phynix "$(readlink -f result-iso)"
 
   # -----------------------------------------------------------------------
   # GitHub Release (tag pushes only)
@@ -98,119 +104,22 @@ jobs:
             3. Write to USB: `dd if=phynix-os-*.iso of=/dev/sdX bs=4M status=progress`
             4. Boot and follow the TUI installer
 
-            ### Copilot
-
-            After installation:
-            ```bash
-            pcopilot --backend          # Check LLM backend
-            pcopilot --reindex          # Build RAG index
-            pcopilot "how do I..."      # Ask anything NixOS-related
-            ```
-
-            ### Binary Cache (Garnix)
+            ### Binary cache
 
             ```nix
             nix.settings = {
-              substituters = [ "https://cache.garnix.io" ];
-              trusted-public-keys = [
-                "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
-              ];
+              substituters = [ "https://cache.phynix-os.example/phynix" ];
+              trusted-public-keys = [ "phynix:PLACEHOLDER_ATTIC_PUBLIC_KEY=" ];
             };
             ```
 
             ### Links
 
             - Documentation: [PHYNIX OS Docs](https://github.com/${{ github.repository }})
-            - Builds & cache: [Garnix](https://garnix.io)
+            - CI: [Hercules CI](https://hercules-ci.com)
+            - Mirror: [Codeberg](https://codeberg.org/phynix-os/phynix-os)
           draft: false
           prerelease: ${{ contains(github.ref_name, '-rc') || contains(github.ref_name, '-alpha') || contains(github.ref_name, '-beta') }}
           files: |
             ./release/*.iso
             ./release/*.sha256
-
-  # -----------------------------------------------------------------------
-  # Python tests (copilot agent) — no Nix required
-  # -----------------------------------------------------------------------
-  python-tests:
-    name: Python Agent Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-
-      - name: Install dependencies
-        run: |
-          pip install -r phynix-os/pkgs/phynix-copilot/requirements.txt \
-            --quiet --no-deps 2>/dev/null || true
-          pip install pydantic requests rich
-
-      - name: Syntax check
-        run: |
-          for f in phynix-os/pkgs/phynix-copilot/*.py; do
-            python3 -m py_compile "$f" && echo "ok $f"
-          done
-
-      - name: Module import tests
-        run: |
-          python3 << 'EOF'
-          import sys
-          sys.path.insert(0, 'phynix-os/pkgs/phynix-copilot')
-
-          for mod in ['tools', 'rag', 'evolution', 'completions', 'write_tools', 'write_agent']:
-              try:
-                  __import__(mod)
-                  print(f"ok {mod}")
-              except ImportError as e:
-                  print(f"skip {mod} (missing optional dep): {e}")
-              except Exception as e:
-                  print(f"fail {mod}: {e}")
-                  sys.exit(1)
-          EOF
-
-      - name: RAG index test
-        run: |
-          python3 << 'EOF'
-          import sys, tempfile
-          sys.path.insert(0, 'phynix-os/pkgs/phynix-copilot')
-          from rag import RAGIndex
-
-          with tempfile.TemporaryDirectory() as tmp:
-              rag = RAGIndex(tmp)
-              result = rag.index_all()
-              assert result['total_chunks'] > 0, "No chunks indexed"
-              assert result['nixos_options']['count'] > 0
-
-              results = rag.search("pipewire audio", top_k=2)
-              assert results, "Search returned nothing"
-              print(f"RAG: {result['total_chunks']} chunks indexed")
-              print(f"Search: '{results[0]['title']}' score={results[0]['relevance']}")
-          EOF
-
-      - name: Agent routing test
-        run: |
-          python3 << 'EOF'
-          import sys, tempfile
-          sys.path.insert(0, 'phynix-os/pkgs/phynix-copilot')
-
-          import rag as rag_mod
-          orig = rag_mod.RAGIndex.__init__
-          import tempfile; tmp = tempfile.mkdtemp()
-          rag_mod.RAGIndex.__init__ = lambda self, db=None: orig(self, tmp)
-
-          from agent import PhynixCopilot
-          c = PhynixCopilot(interactive=True)
-
-          cases = [
-              ("search ripgrep",   "nix_search"),
-              ("check flake",      "nix_flake_check"),
-              ("install vim hm",   "write_agent"),
-          ]
-          for query, expected in cases:
-              got = c._route_query(query)["tool"]
-              assert got == expected, f"'{query}': expected {expected}, got {got}"
-              print(f"ok '{query}' -> {got}")
-          EOF
